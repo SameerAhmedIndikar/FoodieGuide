@@ -1,0 +1,58 @@
+{% extends 'recipes/base.html' %}
+{% block title %}{{ recipe.title }}{% endblock %}
+{% block content %}
+    <div class="recipe-detail fade-in">
+        <h2>{{ recipe.title }}</h2>
+        {% if recipe.image %}
+            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-image">
+        {% endif %}
+        <p><strong>Category:</strong> {{ recipe.category.name }}</p>
+        <p><strong>Author:</strong> {{ recipe.author.username }}</p>
+        <p><strong>Cooking Time:</strong> {{ recipe.cooking_time }} minutes</p>
+        <p><strong>Average Rating:</strong> {% if avg_rating %} {{ avg_rating|floatformat:1 }} stars {% else %} No ratings yet {% endif %}</p>
+
+        <h3>Ingredients</h3>
+        <ul>
+            {% for ri in recipe.recipeingredient_set.all %}
+                <li>{{ ri.quantity }} {{ ri.unit }} {{ ri.ingredient.name }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Instructions</h3>
+        <p>{{ recipe.instructions }}</p>
+
+        <h3>Rate this Recipe</h3>
+        {% if user.is_authenticated %}
+            <form action="{% url 'recipe_detail' recipe.pk %}" method="post">
+                {% csrf_token %}
+                {{ rating_form.as_p }}
+                <input type="hidden" name="rating">
+                <button type="submit" class="btn">Submit Rating</button>
+            </form>
+        {% else %}
+            <p><a href="{% url 'login' %}">Log in</a> to rate this recipe.</p>
+        {% endif %}
+
+        <h3>Comments</h3>
+        {% for comment in comments %}
+            <div class="comment">
+                <p><strong>{{ comment.user.username }}</strong> - {{ comment.created_at|date:"F d, Y" }}</p>
+                <p>{{ comment.text }}</p>
+            </div>
+        {% empty %}
+            <p>No comments yet.</p>
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+            <h3>Add a Comment</h3>
+            <form action="{% url 'recipe_detail' recipe.pk %}" method="post">
+                {% csrf_token %}
+                {{ comment_form.as_p }}
+                <input type="hidden" name="comment">
+                <button type="submit" class="btn">Submit Comment</button>
+            </form>
+        {% else %}
+            <p><a href="{% url 'login' %}">Log in</a> to add a comment.</p>
+        {% endif %}
+    </div>
+{% endblock %}

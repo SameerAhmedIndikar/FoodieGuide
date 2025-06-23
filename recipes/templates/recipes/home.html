@@ -1,0 +1,45 @@
+
+{% extends 'recipes/base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h2 class="fade-in">Welcome to FoodieGuide</h2>
+    <p class="fade-in">Discover delicious recipes from around the world!</p>
+
+    <div class="search-form fade-in">
+        <form action="{% url 'search_recipes' %}" method="get">
+            <input type="text" name="q" placeholder="Search recipes..." value="{{ query }}">
+            <select name="category">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id == category_id %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <h3 class="fade-in">Latest Recipes</h3>
+    <div class="recipe-grid">
+        {% for recipe in recipes %}
+            <div class="recipe-card">
+                {% if recipe.image %}
+                    <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+                {% else %}
+                    <img src="{% static 'images/placeholder.jpg' %}" alt="Placeholder">
+                {% endif %}
+                <div class="recipe-card-content">
+                    <h3>{{ recipe.title }}</h3>
+                    <p>{{ recipe.instructions|truncatewords:20 }}</p>
+                    <a href="{% url 'recipe_detail' recipe.pk %}" class="btn">View Recipe</a>
+                </div>
+            </div>
+        {% empty %}
+            <p>No recipes yet. <a href="{% url 'add_recipe' %}">Add one now!</a></p>
+        {% endfor %}
+    </div>
+{% endblock %}
